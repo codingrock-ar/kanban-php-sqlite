@@ -89,10 +89,9 @@
                                 <label>Estado</label>
                                 <select name="status">
                                     <option>Backlog</option>
-                                    <option>To Do</option>
-                                    <option>In Progress</option>
+                                    <option value="In Progress">Doing</option>
                                     <option>Done</option>
-                                    <option>Revisión</option>
+                                    <option>En Revisión</option>
                                 </select>
                             </div>
                             <div class="form-group">
