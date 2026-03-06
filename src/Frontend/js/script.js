@@ -286,14 +286,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     btnNew.addEventListener('click', () => toggleModal('modalOverlay'));
     btnClose.addEventListener('click', () => closeModal('modalOverlay'));
-
-    const btnLogout = document.getElementById('btnLogout');
-    if (btnLogout) {
-        btnLogout.addEventListener('click', () => {
-            localStorage.clear();
-            window.location.reload();
-        });
-    }
     
     document.getElementById('navProjects').addEventListener('click', (e) => {
         e.preventDefault();
