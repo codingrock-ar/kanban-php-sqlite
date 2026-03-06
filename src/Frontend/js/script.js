@@ -2,8 +2,84 @@
 
 const API_PATH = 'api.php';
 
+let projects = [];
+let assignees = [];
+
+async function fetchProjects() {
+    try {
+        const response = await fetch(`${API_PATH}?route=projects`);
+        const data = await response.json();
+        projects = data.projects || [];
+        populateSelect('taskProject', projects, 'Sin proyecto');
+        renderProjectList();
+    } catch (e) { console.error("Projects fetch error:", e); }
+}
+
+function renderProjectList() {
+    const list = document.getElementById('projectList');
+    if (!list) return;
+    list.innerHTML = projects.map(p => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #eee;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <div style="width:12px; height:12px; border-radius:50%; background:${p.color}"></div>
+                <span>${p.name}</span>
+            </div>
+            <button onclick="deleteProject(${p.id})" style="background:none; border:none; cursor:pointer; color:#ef4444;">🗑️</button>
+        </div>
+    `).join('') || '<div style="color:#94a3b8; font-size:12px; text-align:center;">No hay proyectos</div>';
+}
+
+window.deleteProject = async function(id) {
+    if (!confirm('¿Eliminar proyecto?')) return;
+    await fetch(`${API_PATH}?route=projects/delete`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id })
+    });
+    fetchProjects();
+}
+
+async function fetchAssignees() {
+    try {
+        const response = await fetch(`${API_PATH}?route=assignees`);
+        const data = await response.json();
+        assignees = data.assignees || [];
+        populateSelect('taskAssignee', assignees, 'Sin asignar');
+        renderAssigneeList();
+    } catch (e) { console.error("Assignees fetch error:", e); }
+}
+
+function renderAssigneeList() {
+    const list = document.getElementById('assigneeList');
+    if (!list) return;
+    list.innerHTML = assignees.map(a => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #eee;">
+            <span>👤 ${a.name}</span>
+            <button onclick="deleteAssignee(${a.id})" style="background:none; border:none; cursor:pointer; color:#ef4444;">🗑️</button>
+        </div>
+    `).join('') || '<div style="color:#94a3b8; font-size:12px; text-align:center;">No hay integrantes</div>';
+}
+
+window.deleteAssignee = async function(id) {
+    if (!confirm('¿Eliminar integrante?')) return;
+    await fetch(`${API_PATH}?route=assignees/delete`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id })
+    });
+    fetchAssignees();
+}
+
+function populateSelect(id, items, defaultText) {
+    const select = document.getElementById(id);
+    if (!select) return;
+    select.innerHTML = `<option value="">${defaultText}</option>` + 
+        items.map(item => `<option value="${item.id}">${item.name}</option>`).join('');
+}
+
 async function fetchTasks() {
     try {
+        await Promise.all([fetchProjects(), fetchAssignees()]);
         const response = await fetch(`${API_PATH}?route=tasks`);
         if (!response.ok) throw new Error("API Error");
         
@@ -45,9 +121,17 @@ function renderBoard(tasks) {
 
         listEl.innerHTML = columns[colId].map(task => `
             <div class="card" draggable="true" data-id="${task.id}" ondragstart="handleDragStart(event)">
-                ${task.project ? `<div class="card-project">${task.project}</div>` : ''}
+                ${task.project_name ? `
+                    <div class="card-project" style="color: ${task.project_color || 'var(--accent)'}">
+                        ${task.project_name}
+                    </div>
+                ` : ''}
                 <div class="card-title">${task.title}</div>
-                ${task.description ? `<div class="card-desc">${task.description}</div>` : ''}
+                ${task.assignee_name ? `
+                    <div class="card-assignee" style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">
+                        👤 ${task.assignee_name}
+                    </div>
+                ` : ''}
                 
                 <div class="card-dates" style="font-size: 11px; color: #64748b; margin-top: 8px; display: flex; flex-direction: column; gap: 2px;">
                     <div>📅 Creado: ${formatDate(task.created_at)}</div>
@@ -125,12 +209,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnNew = document.getElementById('btnNew');
     const btnClose = document.querySelector('.close-modal');
 
-    const toggleModal = () => overlay.classList.toggle('active');
+    const toggleModal = (id) => document.getElementById(id).classList.toggle('active');
+    window.closeModal = (id) => document.getElementById(id).classList.remove('active');
 
-    btnNew.addEventListener('click', toggleModal);
-    btnClose.addEventListener('click', toggleModal);
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) toggleModal();
+    btnNew.addEventListener('click', () => toggleModal('modalOverlay'));
+    btnClose.addEventListener('click', () => closeModal('modalOverlay'));
+    
+    document.getElementById('navProjects').addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleModal('projectModalOverlay');
+    });
+    
+    document.getElementById('navTeam').addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleModal('teamModalOverlay');
+    });
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.classList.remove('active');
+        });
+    });
+
+    document.getElementById('newProject').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        await fetch(`${API_PATH}?route=projects`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ name: fd.get('name'), color: fd.get('color') })
+        });
+        e.target.reset();
+        fetchProjects();
+    });
+
+    document.getElementById('newAssignee').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        await fetch(`${API_PATH}?route=assignees`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ name: fd.get('name') })
+        });
+        e.target.reset();
+        fetchAssignees();
     });
 
     document.getElementById('newTask').addEventListener('submit', async (e) => {
@@ -138,7 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const fd = new FormData(e.target);
         const payload = {
             title: fd.get('title'),
-            project: fd.get('project'),
+            project_id: fd.get('project_id') || null,
+            assignee_id: fd.get('assignee_id') || null,
             status: fd.get('status'),
             priority: fd.get('priority'),
             due_date: fd.get('due_date')

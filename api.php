@@ -18,28 +18,54 @@ function respond($code, $payload) {
 }
 
 try {
-    if ($method === 'GET' && $routeParts[0] === 'tasks') {
-        respond(200, $controller->index());
-    }
-
-    if ($method === 'POST' && $routeParts[0] === 'tasks') {
-        $data = json_decode(file_get_contents('php://input'), true);
-        
-        if (isset($routeParts[1])) {
-            if ($routeParts[1] === 'move') {
-                respond(200, $controller->move($data));
+    // Task Routes
+    if ($routeParts[0] === 'tasks') {
+        if ($method === 'GET') {
+            respond(200, $controller->index());
+        }
+        if ($method === 'POST') {
+            $data = json_decode(file_get_contents('php://input'), true);
+            if (isset($routeParts[1])) {
+                if ($routeParts[1] === 'move') respond(200, $controller->move($data));
+                if ($routeParts[1] === 'delete') respond(200, $controller->destroy($data));
+            } else {
+                respond(201, $controller->store($data));
             }
-            if ($routeParts[1] === 'delete') {
-                respond(200, $controller->destroy($data));
-            }
-        } else {
-            respond(201, $controller->store($data));
+        }
+        if ($method === 'PUT' && isset($routeParts[1])) {
+            $data = json_decode(file_get_contents('php://input'), true);
+            respond(200, $controller->update($routeParts[1], $data));
         }
     }
 
-    if ($method === 'PUT' && $routeParts[0] === 'tasks' && isset($routeParts[1])) {
-        $data = json_decode(file_get_contents('php://input'), true);
-        respond(200, $controller->update($routeParts[1], $data));
+    // Project Routes
+    if ($routeParts[0] === 'projects') {
+        use App\Controllers\ProjectController;
+        $projController = new ProjectController();
+        if ($method === 'GET') respond(200, $projController->index());
+        if ($method === 'POST') {
+            $data = json_decode(file_get_contents('php://input'), true);
+            respond(201, $projController->store($data));
+        }
+        if ($method === 'DELETE' || ($method === 'POST' && isset($routeParts[1]) && $routeParts[1] === 'delete')) {
+            $data = json_decode(file_get_contents('php://input'), true);
+            respond(200, $projController->destroy($data));
+        }
+    }
+
+    // Assignee Routes
+    if ($routeParts[0] === 'assignees') {
+        use App\Controllers\AssigneeController;
+        $assigneeController = new AssigneeController();
+        if ($method === 'GET') respond(200, $assigneeController->index());
+        if ($method === 'POST') {
+            $data = json_decode(file_get_contents('php://input'), true);
+            respond(201, $assigneeController->store($data));
+        }
+        if ($method === 'DELETE' || ($method === 'POST' && isset($routeParts[1]) && $routeParts[1] === 'delete')) {
+            $data = json_decode(file_get_contents('php://input'), true);
+            respond(200, $assigneeController->destroy($data));
+        }
     }
 
     respond(404, ['error' => 'Route not found: ' . $route]);

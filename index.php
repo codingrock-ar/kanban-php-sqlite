@@ -28,14 +28,14 @@
                 <h3>Menú</h3>
             </div>
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item active">
+                <a href="#" class="nav-item active" id="navTasks">
                     <span class="nav-icon">📋</span> Tareas
                 </a>
-                <a href="#" class="nav-item">
+                <a href="#" class="nav-item" id="navProjects">
                     <span class="nav-icon">📂</span> Proyectos
                 </a>
-                <a href="#" class="nav-item">
-                    <span class="nav-icon">📊</span> Reportes
+                <a href="#" class="nav-item" id="navTeam">
+                    <span class="nav-icon">👥</span> Equipo
                 </a>
             </nav>
         </aside>
@@ -87,7 +87,15 @@
                         </div>
                         <div class="form-group">
                             <label>Proyecto</label>
-                            <input name="project" placeholder="Nombre del proyecto" />
+                            <select name="project_id" id="taskProject">
+                                <option value="">Sin proyecto</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Asignado a</label>
+                            <select name="assignee_id" id="taskAssignee">
+                                <option value="">Sin asignar</option>
+                            </select>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
@@ -114,6 +122,41 @@
                         </div>
                         <button class="btn btn-block btn-primary" type="submit">Crear Tarea</button>
                     </form>
+                </div>
+            </div>
+
+            <!-- Projects Management Modal -->
+            <div id="projectModalOverlay" class="modal-overlay">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3>Gestionar Proyectos</h3>
+                        <button class="close-modal" onclick="closeModal('projectModalOverlay')">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="newProject" style="display:flex; gap:8px; margin-bottom:16px;">
+                            <input name="name" placeholder="Nombre del proyecto" required style="flex:1" />
+                            <input type="color" name="color" value="#3b82f6" style="width:40px; padding:2px;" />
+                            <button class="btn btn-primary" type="submit">+</button>
+                        </form>
+                        <div id="projectList" style="max-height:200px; overflow-y:auto;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Management Modal -->
+            <div id="teamModalOverlay" class="modal-overlay">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3>Gestionar Equipo</h3>
+                        <button class="close-modal" onclick="closeModal('teamModalOverlay')">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="newAssignee" style="display:flex; gap:8px; margin-bottom:16px;">
+                            <input name="name" placeholder="Nombre del integrante" required style="flex:1" />
+                            <button class="btn btn-primary" type="submit">+</button>
+                        </form>
+                        <div id="assigneeList" style="max-height:200px; overflow-y:auto;"></div>
+                    </div>
                 </div>
             </div>
         </main>

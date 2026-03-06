@@ -31,17 +31,41 @@ class Database {
     }
 
     private function migrate() {
+        // Projects table
+        $this->pdo->exec(
+            "CREATE TABLE IF NOT EXISTS projects (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                color TEXT DEFAULT '#3b82f6',
+                created_at TEXT
+            )"
+        );
+
+        // Assignees table
+        $this->pdo->exec(
+            "CREATE TABLE IF NOT EXISTS assignees (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                avatar TEXT,
+                created_at TEXT
+            )"
+        );
+
+        // Tasks table
         $this->pdo->exec(
             "CREATE TABLE IF NOT EXISTS tasks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
                 description TEXT,
                 status TEXT NOT NULL DEFAULT 'Backlog',
-                project TEXT,
+                project_id INTEGER,
+                assignee_id INTEGER,
                 priority TEXT DEFAULT 'Low',
                 due_date TEXT,
                 created_at TEXT,
-                updated_at TEXT
+                updated_at TEXT,
+                FOREIGN KEY (project_id) REFERENCES projects(id),
+                FOREIGN KEY (assignee_id) REFERENCES assignees(id)
             )"
         );
     }

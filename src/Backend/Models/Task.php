@@ -12,7 +12,12 @@ class Task {
     }
 
     public function all() {
-        $stmt = $this->db->query("SELECT * FROM tasks ORDER BY created_at DESC");
+        $sql = "SELECT t.*, p.name as project_name, p.color as project_color, a.name as assignee_name 
+                FROM tasks t 
+                LEFT JOIN projects p ON t.project_id = p.id 
+                LEFT JOIN assignees a ON t.assignee_id = a.id 
+                ORDER BY t.created_at DESC";
+        $stmt = $this->db->query($sql);
         return $stmt->fetchAll();
     }
 
@@ -24,12 +29,13 @@ class Task {
 
     public function create($data) {
         $now = date('Y-m-d H:i:s');
-        $stmt = $this->db->prepare("INSERT INTO tasks (title, description, status, project, priority, due_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $this->db->prepare("INSERT INTO tasks (title, description, status, project_id, assignee_id, priority, due_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $data['title'],
             $data['description'] ?? '',
             $data['status'] ?? 'Backlog',
-            $data['project'] ?? '',
+            $data['project_id'] ?? null,
+            $data['assignee_id'] ?? null,
             $data['priority'] ?? 'Low',
             $data['due_date'] ?? null,
             $now,
