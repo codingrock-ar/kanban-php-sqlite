@@ -58,15 +58,20 @@ class Database {
                 title TEXT NOT NULL,
                 description TEXT,
                 status TEXT NOT NULL DEFAULT 'Backlog',
-                project_id INTEGER,
-                assignee_id INTEGER,
                 priority TEXT DEFAULT 'Low',
                 due_date TEXT,
                 created_at TEXT,
-                updated_at TEXT,
-                FOREIGN KEY (project_id) REFERENCES projects(id),
-                FOREIGN KEY (assignee_id) REFERENCES assignees(id)
+                updated_at TEXT
             )"
         );
+
+        // Add missing columns if they don't exist (SQLite doesn't support IF NOT EXISTS for columns)
+        try {
+            @$this->pdo->exec("ALTER TABLE tasks ADD COLUMN project_id INTEGER REFERENCES projects(id)");
+        } catch (PDOException $e) {}
+        
+        try {
+            @$this->pdo->exec("ALTER TABLE tasks ADD COLUMN assignee_id INTEGER REFERENCES assignees(id)");
+        } catch (PDOException $e) {}
     }
 }

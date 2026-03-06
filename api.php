@@ -2,6 +2,8 @@
 require_once __DIR__ . '/autoload.php';
 
 use App\Controllers\TaskController;
+use App\Controllers\ProjectController;
+use App\Controllers\AssigneeController;
 
 header('Content-Type: application/json');
 
@@ -40,7 +42,6 @@ try {
 
     // Project Routes
     if ($routeParts[0] === 'projects') {
-        use App\Controllers\ProjectController;
         $projController = new ProjectController();
         if ($method === 'GET') respond(200, $projController->index());
         if ($method === 'POST') {
@@ -55,7 +56,6 @@ try {
 
     // Assignee Routes
     if ($routeParts[0] === 'assignees') {
-        use App\Controllers\AssigneeController;
         $assigneeController = new AssigneeController();
         if ($method === 'GET') respond(200, $assigneeController->index());
         if ($method === 'POST') {
