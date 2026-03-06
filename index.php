@@ -12,9 +12,14 @@
 <body>
     <div class="topbar">
         <div class="logo">Kanban<span>Flow</span></div>
-        <button class="btn btn-primary" id="btnNew">
-            <span class="icon">+</span> Nueva Tarea
-        </button>
+        <div class="topbar-actions">
+            <button class="btn btn-primary" id="btnNew">
+                <span class="icon">+</span> Nueva Tarea
+            </button>
+            <button class="btn btn-outline" id="btnLogout" onclick="alert('Funcionalidad de Logout próximamente')">
+                <span class="icon">🚪</span> Salir
+            </button>
+        </div>
     </div>
 
     <div class="app-layout">
@@ -113,6 +118,6 @@
             </div>
         </main>
     </div>
-    <script src="script.js"></script>
+    <script src="src/Frontend/js/script.js"></script>
 </body>
 </html>

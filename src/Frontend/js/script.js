@@ -1,6 +1,6 @@
 /** Kanban Flow - Modern Frontend Logic **/
 
-const API_PATH = 'api.php';
+const API_PATH = '/api.php';
 
 async function fetchTasks() {
     try {

@@ -60,7 +60,22 @@ body {
     border-bottom: 1px solid var(--border);
     z-index: 100;
 }
+.topbar-actions {
+    display: flex;
+    gap: 12px;
+}
 
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+}
+
+.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
 .logo {
     font-size: 20px;
     font-weight: 700;
