@@ -1,13 +1,10 @@
-<?php
-require 'db.php';
-?>
 <!doctype html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
     <title>Kanban Premium - PHP + SQLite</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="src/Frontend/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
@@ -48,13 +45,6 @@ require 'db.php';
                         </div>
                         <div class="card-list"></div>
                     </div>
-                    <div class="col" id="todo">
-                        <div class="col-header">
-                            <h3>To Do</h3>
-                            <span class="count">0</span>
-                        </div>
-                        <div class="card-list"></div>
-                    </div>
                     <div class="col" id="doing">
                         <div class="col-header">
                             <h3>In Progress</h3>
@@ -69,9 +59,9 @@ require 'db.php';
                         </div>
                         <div class="card-list"></div>
                     </div>
-                    <div class="col" id="revision">
+                    <div class="col" id="todo">
                         <div class="col-header">
-                            <h3>Revisión</h3>
+                            <h3>En Revisión</h3>
                             <span class="count">0</span>
                         </div>
                         <div class="card-list"></div>

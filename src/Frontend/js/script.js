@@ -19,14 +19,20 @@ async function fetchTasks() {
 function renderBoard(tasks) {
     const columns = {
         backlog: tasks.filter(t => t.status === 'Backlog'),
-        todo: tasks.filter(t => t.status === 'To Do'),
         doing: tasks.filter(t => t.status === 'In Progress'),
         done: tasks.filter(t => t.status === 'Done'),
-        revision: tasks.filter(t => t.status === 'Revisión')
+        todo: tasks.filter(t => t.status === 'En Revisión')
+    };
+
+    const formatDate = (dateStr) => {
+        if (!dateStr) return null;
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
     };
 
     Object.keys(columns).forEach(colId => {
         const colEl = document.getElementById(colId);
+        if (!colEl) return;
         const listEl = colEl.querySelector('.card-list');
         const countEl = colEl.querySelector('.count');
         
@@ -42,6 +48,12 @@ function renderBoard(tasks) {
                 ${task.project ? `<div class="card-project">${task.project}</div>` : ''}
                 <div class="card-title">${task.title}</div>
                 ${task.description ? `<div class="card-desc">${task.description}</div>` : ''}
+                
+                <div class="card-dates" style="font-size: 11px; color: #64748b; margin-top: 8px; display: flex; flex-direction: column; gap: 2px;">
+                    <div>📅 Creado: ${formatDate(task.created_at)}</div>
+                    ${task.due_date ? `<div style="color: #ef4444; font-weight: 600;">⌛ Límite: ${formatDate(task.due_date)}</div>` : ''}
+                </div>
+
                 <div class="card-footer">
                     <span class="card-priority priority-${task.priority || 'Low'}">${task.priority || 'Baja'}</span>
                     <div class="card-actions">
@@ -50,10 +62,9 @@ function renderBoard(tasks) {
                         <select onchange="moveTask(${task.id}, this.value)" style="width: auto; padding: 2px; font-size: 10px; margin-left: 4px;">
                             <option value="" disabled selected>Mover...</option>
                             <option value="Backlog">Backlog</option>
-                            <option value="To Do">To Do</option>
                             <option value="In Progress">Doing</option>
                             <option value="Done">Done</option>
-                            <option value="Revisión">Revisión</option>
+                            <option value="En Revisión">Revisión</option>
                         </select>
                     </div>
                 </div>
@@ -153,11 +164,12 @@ document.addEventListener('DOMContentLoaded', () => {
         col.addEventListener('drop', async e => {
             e.preventDefault();
             const id = e.dataTransfer.getData('task-id');
-            const status = col.querySelector('h3').textContent; // Simplificación
+            const status = col.querySelector('h3').textContent;
             
-            // Map common names
+            // Map column titles to internal status names
             let mappedStatus = status;
-            if (status === 'In Progress') mappedStatus = 'In Progress';
+            if (status === 'Doing') mappedStatus = 'In Progress';
+            if (status === 'En Revisión') mappedStatus = 'En Revisión';
             
             await moveTask(id, mappedStatus);
         });
