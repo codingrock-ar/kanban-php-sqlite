@@ -71,6 +71,10 @@ class Database {
         } catch (PDOException $e) {}
         
         try {
+            @$this->pdo->exec("ALTER TABLE tasks ADD COLUMN assignee_id INTEGER REFERENCES assignees(id)");
+        } catch (PDOException $e) {}
+
+        try {
             @$this->pdo->exec("ALTER TABLE tasks ADD COLUMN is_archived INTEGER DEFAULT 0");
         } catch (PDOException $e) {}
     }
