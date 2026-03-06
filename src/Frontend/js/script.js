@@ -268,16 +268,22 @@ function handleDragStart(e) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    fetchTasks();
+    // Logout Logic first
+    const btnLogout = document.getElementById('btnLogout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            console.log("Logout triggered");
+            localStorage.clear();
+            window.location.reload();
+        });
+    }
 
-    const modal = document.getElementById('newModal');
-    const overlay = document.getElementById('modalOverlay');
-    const btnNew = document.getElementById('btnNew');
-    const btnClose = document.querySelector('.close-modal');
+    fetchTasks();
 
     const toggleModal = (id) => document.getElementById(id).classList.toggle('active');
     window.closeModal = (id) => document.getElementById(id).classList.remove('active');
-
+    window.toggleModal = toggleModal; // Export to global scope
+    
     btnNew.addEventListener('click', () => toggleModal('modalOverlay'));
     btnClose.addEventListener('click', () => closeModal('modalOverlay'));
 
