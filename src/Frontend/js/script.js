@@ -278,6 +278,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const btnNew = document.getElementById('btnNew');
+    const btnClose = document.querySelector('.close-modal');
+
     fetchTasks();
 
     const toggleModal = (id) => document.getElementById(id).classList.toggle('active');
