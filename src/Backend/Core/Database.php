@@ -9,7 +9,7 @@ class Database {
     private $pdo;
 
     private function __construct() {
-        $dbFile = __DIR__ . '/../../database.sqlite';
+        $dbFile = __DIR__ . '/../../../database.sqlite';
         $dsn = 'sqlite:' . $dbFile;
         try {
             $this->pdo = new PDO($dsn);

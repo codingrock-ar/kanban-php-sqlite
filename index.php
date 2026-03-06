@@ -16,7 +16,7 @@
             <button class="btn btn-primary" id="btnNew">
                 <span class="icon">+</span> Nueva Tarea
             </button>
-            <button class="btn btn-outline" id="btnLogout" onclick="alert('Funcionalidad de Logout próximamente')">
+            <button class="btn btn-outline" id="btnLogout" onclick="localStorage.clear(); location.reload();">
                 <span class="icon">🚪</span> Salir
             </button>
         </div>
