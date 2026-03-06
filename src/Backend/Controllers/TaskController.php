@@ -24,13 +24,17 @@ class TaskController {
         return ['status' => 'success'];
     }
 
-    public function update($id, $data) {
-        $this->taskModel->updateTitle($id, $data['title']);
+    public function archived($page = 1) {
+        return $this->taskModel->getArchived($page);
+    }
+
+    public function archive($data) {
+        $this->taskModel->archive($data['id']);
         return ['status' => 'success'];
     }
 
-    public function destroy($data) {
-        $this->taskModel->delete($data['id']);
+    public function update($id, $data) {
+        $this->taskModel->update($id, $data);
         return ['status' => 'success'];
     }
 }

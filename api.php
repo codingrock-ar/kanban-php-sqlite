@@ -23,13 +23,19 @@ try {
     // Task Routes
     if ($routeParts[0] === 'tasks') {
         if ($method === 'GET') {
-            respond(200, $controller->index());
+            if (isset($routeParts[1]) && $routeParts[1] === 'archived') {
+                $page = $_GET['page'] ?? 1;
+                respond(200, $controller->archived($page));
+            } else {
+                respond(200, $controller->index());
+            }
         }
         if ($method === 'POST') {
             $data = json_decode(file_get_contents('php://input'), true);
             if (isset($routeParts[1])) {
                 if ($routeParts[1] === 'move') respond(200, $controller->move($data));
                 if ($routeParts[1] === 'delete') respond(200, $controller->destroy($data));
+                if ($routeParts[1] === 'archive') respond(200, $controller->archive($data));
             } else {
                 respond(201, $controller->store($data));
             }

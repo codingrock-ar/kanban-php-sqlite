@@ -4,6 +4,8 @@ const API_PATH = 'api.php';
 
 let projects = [];
 let assignees = [];
+let allTasks = [];
+let archivedPage = 1;
 
 async function fetchProjects() {
     try {
@@ -86,6 +88,7 @@ async function fetchTasks() {
         const data = await response.json();
         if (!data || !data.tasks) return;
 
+        allTasks = data.tasks;
         renderBoard(data.tasks);
     } catch (e) {
         console.error("Fetch error:", e);
@@ -132,6 +135,7 @@ function renderBoard(tasks) {
                         👤 ${task.assignee_name}
                     </div>
                 ` : ''}
+                ${task.description ? `<div class="card-desc" style="font-size: 12px; color: #475569; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${task.description}</div>` : ''}
                 
                 <div class="card-dates" style="font-size: 11px; color: #64748b; margin-top: 8px; display: flex; flex-direction: column; gap: 2px;">
                     <div>📅 Creado: ${formatDate(task.created_at)}</div>
@@ -141,6 +145,7 @@ function renderBoard(tasks) {
                 <div class="card-footer">
                     <span class="card-priority priority-${task.priority || 'Low'}">${task.priority || 'Baja'}</span>
                     <div class="card-actions">
+                        ${task.status === 'Done' ? `<button class="action-btn" onclick="archiveTask(${task.id})" title="Archivar">📦</button>` : ''}
                         <button class="action-btn" onclick="editTask(${task.id})" title="Editar">✏️</button>
                         <button class="action-btn" onclick="deleteTask(${task.id})" title="Eliminar">🗑️</button>
                         <select onchange="moveTask(${task.id}, this.value)" style="width: auto; padding: 2px; font-size: 10px; margin-left: 4px;">
@@ -185,15 +190,62 @@ window.deleteTask = async function(id) {
     }
 }
 
-window.editTask = function(id) {
-    const newTitle = prompt('Nuevo título para la tarea:');
-    if (newTitle && newTitle.trim()) {
-        fetch(`${API_PATH}?route=tasks/${id}`, {
-            method: 'PUT',
+window.archiveTask = async function(id) {
+    if (!confirm('¿Archivar esta tarea? Se ocultará del tablero principal.')) return;
+    try {
+        await fetch(`${API_PATH}?route=tasks/archive`, {
+            method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ title: newTitle })
-        }).then(() => fetchTasks());
-    }
+            body: JSON.stringify({ id })
+        });
+        fetchTasks();
+    } catch (e) { console.error("Archive error:", e); }
+}
+
+window.editTask = function(id) {
+    const task = allTasks.find(t => t.id == id);
+    if (!task) return;
+
+    document.getElementById('editTaskId').value = task.id;
+    document.getElementById('editTaskTitle').value = task.title;
+    document.getElementById('editTaskDescription').value = task.description || '';
+    document.getElementById('editTaskStatus').value = task.status;
+    document.getElementById('editTaskPriority').value = task.priority;
+    document.getElementById('editTaskDueDate').value = task.due_date || '';
+    
+    populateSelect('editTaskProject', projects, 'Sin proyecto');
+    populateSelect('editTaskAssignee', assignees, 'Sin asignar');
+    
+    document.getElementById('editTaskProject').value = task.project_id || '';
+    document.getElementById('editTaskAssignee').value = task.assignee_id || '';
+
+    document.getElementById('editModalOverlay').classList.add('active');
+}
+
+async function fetchArchivedTasks(page = 1) {
+    try {
+        const response = await fetch(`${API_PATH}?route=tasks/archived&page=${page}`);
+        const data = await response.json();
+        renderArchivedList(data);
+    } catch (e) { console.error("Archived fetch error:", e); }
+}
+
+function renderArchivedList(data) {
+    const list = document.getElementById('archivedList');
+    const { tasks, pages } = data;
+    
+    archivedPage = data.page || archivedPage;
+    document.getElementById('currentPage').textContent = `Página ${archivedPage} de ${pages || 1}`;
+    
+    list.innerHTML = tasks.map(t => `
+        <div style="padding:12px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div style="font-weight:600; font-size:14px;">${t.title}</div>
+                <div style="font-size:12px; color:#64748b;">${t.project_name || 'Sin proyecto'} • ${t.assignee_name || 'Sin asignar'}</div>
+            </div>
+            <div style="font-size:11px; color:#94a3b8;">Finalizado: ${t.updated_at ? new Date(t.updated_at).toLocaleDateString() : '-'}</div>
+        </div>
+    `).join('') || '<div style="text-align:center; color:#94a3b8; padding:20px;">No hay tareas archivadas</div>';
 }
 
 // Drag and Drop implementation (Simplified)
@@ -224,6 +276,21 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         toggleModal('teamModalOverlay');
     });
+
+    document.getElementById('navArchived').addEventListener('click', (e) => {
+        e.preventDefault();
+        archivedPage = 1;
+        fetchArchivedTasks(1);
+        toggleModal('archivedView');
+    });
+
+    document.getElementById('prevPage').onclick = () => {
+        if (archivedPage > 1) fetchArchivedTasks(--archivedPage);
+    };
+
+    document.getElementById('nextPage').onclick = () => {
+        fetchArchivedTasks(++archivedPage);
+    };
 
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
         overlay.addEventListener('click', (e) => {
@@ -260,6 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const fd = new FormData(e.target);
         const payload = {
             title: fd.get('title'),
+            description: fd.get('description'),
             project_id: fd.get('project_id') || null,
             assignee_id: fd.get('assignee_id') || null,
             status: fd.get('status'),
@@ -275,10 +343,28 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             fetchTasks();
             e.target.reset();
-            toggleModal();
+            toggleModal('modalOverlay');
         } catch (e) {
             console.error("Create error:", e);
         }
+    });
+
+    document.getElementById('editTaskForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const id = fd.get('id');
+        const payload = Object.fromEntries(fd.entries());
+        delete payload.id;
+
+        try {
+            await fetch(`${API_PATH}?route=tasks/${id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            fetchTasks();
+            closeModal('editModalOverlay');
+        } catch (e) { console.error("Update error:", e); }
     });
 
     // Handle columns as drop zones

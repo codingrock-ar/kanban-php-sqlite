@@ -37,6 +37,9 @@
                 <a href="#" class="nav-item" id="navTeam">
                     <span class="nav-icon">👥</span> Equipo
                 </a>
+                <a href="#" class="nav-item" id="navArchived">
+                    <span class="nav-icon">📦</span> Archivados
+                </a>
             </nav>
         </aside>
 
@@ -57,16 +60,16 @@
                         </div>
                         <div class="card-list"></div>
                     </div>
-                    <div class="col" id="done">
+                    <div class="col" id="todo">
                         <div class="col-header">
-                            <h3>Done</h3>
+                            <h3>En Revisión</h3>
                             <span class="count">0</span>
                         </div>
                         <div class="card-list"></div>
                     </div>
-                    <div class="col" id="todo">
+                    <div class="col" id="done">
                         <div class="col-header">
-                            <h3>En Revisión</h3>
+                            <h3>Done</h3>
                             <span class="count">0</span>
                         </div>
                         <div class="card-list"></div>
@@ -84,6 +87,10 @@
                         <div class="form-group">
                             <label>Título</label>
                             <input name="title" placeholder="Ej: Implementar login" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <textarea name="description" placeholder="Detalles de la tarea..." rows="3"></textarea>
                         </div>
                         <div class="form-group">
                             <label>Proyecto</label>
@@ -122,6 +129,81 @@
                         </div>
                         <button class="btn btn-block btn-primary" type="submit">Crear Tarea</button>
                     </form>
+                </div>
+            </div>
+
+            <!-- Edit Task Modal -->
+            <div id="editModalOverlay" class="modal-overlay">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3>Editar Tarea</h3>
+                        <button class="close-modal" onclick="closeModal('editModalOverlay')">&times;</button>
+                    </div>
+                    <form id="editTaskForm" class="modal-body">
+                        <input type="hidden" name="id" id="editTaskId">
+                        <div class="form-group">
+                            <label>Título</label>
+                            <input name="title" id="editTaskTitle" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <textarea name="description" id="editTaskDescription" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Proyecto</label>
+                            <select name="project_id" id="editTaskProject">
+                                <option value="">Sin proyecto</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Asignado a</label>
+                            <select name="assignee_id" id="editTaskAssignee">
+                                <option value="">Sin asignar</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Estado</label>
+                                <select name="status" id="editTaskStatus">
+                                    <option>Backlog</option>
+                                    <option value="In Progress">Doing</option>
+                                    <option>Done</option>
+                                    <option>En Revisión</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Prioridad</label>
+                                <select name="priority" id="editTaskPriority">
+                                    <option value="Low">Baja</option>
+                                    <option value="Medium">Media</option>
+                                    <option value="High">Alta</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha límite</label>
+                            <input type="date" name="due_date" id="editTaskDueDate" />
+                        </div>
+                        <button class="btn btn-block btn-primary" type="submit">Guardar Cambios</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Archived Tasks View -->
+            <div id="archivedView" class="modal-overlay">
+                <div class="modal" style="max-width: 800px; width: 90%;">
+                    <div class="modal-header">
+                        <h3>Tareas Archivadas</h3>
+                        <button class="close-modal" onclick="closeModal('archivedView')">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="archivedList" style="margin-bottom: 20px;"></div>
+                        <div class="pagination" style="display: flex; justify-content: center; gap: 10px; align-items: center;">
+                            <button id="prevPage" class="btn btn-outline btn-sm">Anterior</button>
+                            <span id="currentPage">Página 1</span>
+                            <button id="nextPage" class="btn btn-outline btn-sm">Siguiente</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
