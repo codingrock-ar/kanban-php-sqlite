@@ -135,7 +135,10 @@ function renderBoard(tasks) {
                         👤 ${task.assignee_name}
                     </div>
                 ` : ''}
-                ${task.description ? `<div class="card-desc" style="font-size: 12px; color: #475569; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${task.description}</div>` : ''}
+                ${task.description ? `
+                    <div class="card-desc truncated" id="desc-${task.id}">${task.description}</div>
+                    ${task.description.length > 80 ? `<button class="read-more-btn" onclick="toggleDesc(${task.id}, this)">Leer más</button>` : ''}
+                ` : ''}
                 
                 <div class="card-dates" style="font-size: 11px; color: #64748b; margin-top: 8px; display: flex; flex-direction: column; gap: 2px;">
                     <div>📅 Creado: ${formatDate(task.created_at)}</div>
@@ -187,6 +190,17 @@ window.deleteTask = async function(id) {
         } catch (e) {
             console.error("Delete error:", e);
         }
+    }
+}
+
+window.toggleDesc = function(id, btn) {
+    const desc = document.getElementById(`desc-${id}`);
+    if (desc.classList.contains('truncated')) {
+        desc.classList.remove('truncated');
+        btn.textContent = 'Ver menos';
+    } else {
+        desc.classList.add('truncated');
+        btn.textContent = 'Leer más';
     }
 }
 
